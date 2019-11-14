@@ -1,3 +1,6 @@
+__author__ = 'Allan DoLago'
+__version__ = '1.0'
+
 import tkinter as tk
 import random
 from numpy import dot
@@ -8,12 +11,10 @@ class MainWindow:
     def __init__(self, root):
         #Window Set up
         self._root = root
+        self._root.configure(bg='#FF8000')
         self._root.state('zoomed')
         self._root.title('Multiplying Game')
 
-
-        # combobox_font = font.Font(family='Arial', size=15)
-        # self._root.option_add("*TCombobox*Listbox*Font", combobox_font)
 
         #Widget Initialization
         window_canvas = tk.Canvas(self._root, bg='#FF8000', highlightthickness=0, height=100)
@@ -30,15 +31,16 @@ class MainWindow:
         self._level_number = 1
         self._level_text = tk.Canvas(level_frame, bg='#FF00FF', highlightbackground='#646464', width=30, height=40)
 
-        # pixel = tk.PhotoImage(width=1, height=1)
         start_button = tk.Button(window_canvas, text='Start Time Trial', width=13, height=2, command=lambda:print('START BUTTON', self.start_time_trial()))
 
-        self._current_problem_frame = tk.Frame(self._root)
+        self._problem_strip_frame = tk.Frame(self._root, bg='orange')
+
+        self._current_problem_frame = tk.Frame(self._problem_strip_frame, bg='orange')
         self._answer_current_problem = self.render_problem(self._current_problem_frame)
 
-        check_answer_frame = tk.Frame(self._root)
+        check_answer_frame = tk.Frame(self._problem_strip_frame, bg='orange')
         self._dne_boolean_variable = tk.BooleanVar()
-        self._dne_checkbutton = tk.Checkbutton(check_answer_frame, text='Product Does Not Exist \n(Toggle: Q)', variable=self._dne_boolean_variable)
+        self._dne_checkbutton = tk.Checkbutton(check_answer_frame, text='Product Does Not Exist \n(Toggle: Q)', variable=self._dne_boolean_variable, bg='orange')
         check_answer_button = tk.Button(check_answer_frame, text='Check Answer', width=12, height=2, command=lambda:print('CHECK ANSWER BUTTON:', self.check_answer()))
 
         self._timer_canvas = tk.Canvas(self._root, bg='#FF8000', highlightthickness=0)
@@ -55,6 +57,11 @@ class MainWindow:
         self._num_wrong_answers = 0
         self._wrong_answer_counter = tk.Label(problem_counter_frame, text='#Wrong: 0', font=('Courier', 20), bg='#FF8000')
 
+        author_frame = tk.Frame(problem_counter_frame, bg='#FF8000')
+        author_label = tk.Label(author_frame, text='Made by Allan DoLago', font=('Courier', 18), bg='#FF8000')
+        date_label = tk.Label(author_frame, text='2019-2020', font=('Courier', 10), bg='#FF8000')
+
+
         #Grid Set up
         window_canvas.grid(row=0, column=0, sticky='new', columnspan=2)
 
@@ -70,9 +77,11 @@ class MainWindow:
 
         start_button.grid(row=0, column=3, sticky='w', pady=(20, 0))
 
-        self._current_problem_frame.grid(row=1, column=0, sticky='new')
+        self._problem_strip_frame.grid(row=1, column=0, columnspan=2, sticky='nsew')
 
-        check_answer_frame.grid(row=1, column=1, sticky='new')
+        self._current_problem_frame.grid(row=0, column=0, sticky='ew')
+
+        check_answer_frame.grid(row=0, column=1, sticky='ew')
         self._dne_checkbutton.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
         check_answer_button.grid(row=1, column=0, padx=10, pady=10)
 
@@ -83,6 +92,10 @@ class MainWindow:
         self._correct_answer_counter.grid(row=0, column=0, sticky='nsw', padx=10)
         self._current_streak_counter.grid(row=1, column=0, sticky='nsw', padx=20)
         self._wrong_answer_counter.grid(row=2, column=0, sticky='nsw', padx=10, pady=(0, 10))
+
+        author_frame.grid(row=2, column=1, sticky='se')
+        author_label.grid(row=0, column=0, sticky='se', padx=20)
+        date_label.grid(row=1, column=0, sticky='se', padx=20)
 
 
         #Widget Post-Initialization Configuration
@@ -96,9 +109,9 @@ class MainWindow:
 
 
         #Grid Resizing
-        # self._root.grid_rowconfigure(0, weight=1)
-        # self._root.grid_columnconfigure(0, weight=1)
-        # self._root.grid_rowconfigure(1, weight=1)
+        self._root.grid_columnconfigure(0, weight=1)
+
+        problem_counter_frame.grid_columnconfigure(1, weight=1)
 
 
         #Key Bindings
@@ -190,51 +203,45 @@ class MainWindow:
     def render_problem(self, problem_frame):
         m1, m2, ans = self.generate_problem()
 
-        m1_frame = tk.Frame(problem_frame, bg='#FF8000')
-        m2_frame = tk.Frame(problem_frame, bg='#FF8000')
-        equal_sign_frame = tk.Frame(problem_frame, bg='#FF8000')
-        ans_frame = tk.Frame(problem_frame, bg='#FF8000')
+        m1_frame = tk.Frame(problem_frame, bg='orange')
+        m2_frame = tk.Frame(problem_frame, bg='orange')
+        equal_sign_frame = tk.Frame(problem_frame, bg='orange')
+        ans_frame = tk.Frame(problem_frame, bg='orange')
 
         #print(m1.matrixForm)
-        open_bracket_one = tk.Canvas(m1_frame, width=50, height=60*m1.nRows)
+        open_bracket_one = Bracket(m1_frame, width=50, height=70*m1.nRows, length_y=m1.nRows, type='open', bg='orange', highlightthickness=0)
         open_bracket_one.grid(row=0, column=0, rowspan=m1.nRows, padx=(10, 0), sticky='ns')
-        open_bracket_one.create_text(0, 0, text='[', anchor='nw', font=('Courier', 45*m1.nRows))
         for i in range(m1.nRows):
             for j in range(m1.nCols):
-                text = tk.Canvas(m1_frame, width=50, height=50)
+                text = tk.Canvas(m1_frame, width=50, height=50, bg='orange', highlightthickness=0)
                 text.grid(row=i, column=j+1, padx=10, pady=10)
                 text.create_text(10, 10, text=str(m1.matrixForm[i][j]), anchor='nw', font=30)
-        close_bracket_one = tk.Canvas(m1_frame, width=50, height=60*m1.nRows)
+        close_bracket_one = Bracket(m1_frame, width=50, height=70*m1.nRows, length_y=m1.nRows, type='closed', bg='orange', highlightthickness=0)
         close_bracket_one.grid(row=0, column=m1.nCols+1, rowspan=m1.nRows, padx=(0, 10), sticky='ns')
-        close_bracket_one.create_text(0, 0, text=']', anchor='nw', font=('Courier', 45*m1.nRows))
 
         #print(m2.matrixForm)
-        open_bracket_two = tk.Canvas(m2_frame, width=50, height=60*m2.nRows)
+        open_bracket_two = Bracket(m2_frame, width=50, height=70*m2.nRows, length_y=m2.nRows, type='open', bg='orange', highlightthickness=0)
         open_bracket_two.grid(row=0, column=0, rowspan=m2.nRows, sticky='ns')
-        open_bracket_two.create_text(0, 0, text='[', anchor='nw', font=('Courier', 45*m2.nRows))
         for i in range(m2.nRows):
             for j in range(m2.nCols):
-                text = tk.Canvas(m2_frame, width=50, height=50)
+                text = tk.Canvas(m2_frame, width=50, height=50, bg='orange', highlightthickness=0)
                 text.grid(row=i, column=j+1, padx=10, pady=10)
                 text.create_text(10, 10, text=str(m2.matrixForm[i][j]), anchor='nw', font=30)
-        close_bracket_two = tk.Canvas(m2_frame, width=50, height=60*m2.nRows)
+        close_bracket_two = Bracket(m2_frame, width=50, height=70*m2.nRows, length_y=m2.nRows, type='closed', bg='orange', highlightthickness=0)
         close_bracket_two.grid(row=0, column=m2.nCols+1, rowspan=m2.nRows, padx=(0, 10), sticky='ns')
-        close_bracket_two.create_text(0, 0, text=']', anchor='nw', font=('Courier', 45*m2.nRows))
 
-        equal_sign = tk.Canvas(equal_sign_frame, width=50, height=50)
+        equal_sign = tk.Canvas(equal_sign_frame, width=50, height=50, bg='orange', highlightthickness=0)
         equal_sign.grid(row=0, column=m2.nCols+2)
         equal_sign.create_text(10, 0, text='=', anchor='nw', font=('Courier', 30))
 
 
-        open_bracket_three = tk.Canvas(ans_frame, width=50, height=60*m1.nRows)
+        open_bracket_three = Bracket(ans_frame, width=50, height=70*m1.nRows, length_y=m1.nRows, type='open', bg='orange', highlightthickness=0)
         open_bracket_three.grid(row=0, column=0, rowspan=m1.nRows, sticky='ns')
-        open_bracket_three.create_text(0, 0, text='[', anchor='nw', font=('Courier', 45*m1.nRows))
         stringVariables = [[None for col in range(m2.nCols)] for row in range(m1.nRows)]
         entries = [[None for col in range(m2.nCols)] for row in range(m1.nRows)]
         for i in range(m1.nRows):
             for j in range(m2.nCols):
                 string = tk.StringVar()
-                #string.trace("w", self.toogle_dne_check_on_entry)
                 stringVariables[i][j] = string
                 entry = tk.Entry(ans_frame, textvariable=string, width=4, font=30)
                 entry.grid(row=i, column=j+1, padx=10)
@@ -242,9 +249,8 @@ class MainWindow:
                 entry.bind('<Key-q>', self.toogle_dne_check_on_entry)
                 entries[i][j] = entry
         entries[0][0].focus()
-        close_bracket_three = tk.Canvas(ans_frame, width=50, height=60*m1.nRows)
-        close_bracket_three.grid(row=0, column=m2.nCols+1, rowspan=m1.nRows, sticky='ns')
-        close_bracket_three.create_text(0, 0, text=']', anchor='nw', font=('Courier', 45*m1.nRows))
+        close_bracket_three = Bracket(ans_frame, width=50, height=70*m1.nRows, length_y=m1.nRows, type='closed', bg='orange', highlightthickness=0)
+        close_bracket_three.grid(row=0, column=m2.nCols+1, rowspan=m1.nRows, sticky='ns', padx=(15, 0))
 
         m1_frame.grid(row=0, column=0, sticky='w')
         m2_frame.grid(row=0, column=1, sticky='w')
@@ -253,7 +259,7 @@ class MainWindow:
 
         problem_frame.grid_rowconfigure(0, weight=1)
 
-        print(ans.matrixForm if ans is not None else 'Does Not Exist')
+        #print(ans.matrixForm if ans is not None else 'Does Not Exist')
         self._answer_string_variables = stringVariables
         self._answer_entries = entries
         return ans
@@ -270,9 +276,13 @@ class MainWindow:
         if self._dne_boolean_variable.get():
             if self._answer_current_problem is not None:
                 errors.append(-1)
+            else:
+                self._dne_checkbutton.configure(bg='orange')
         elif self._answer_current_problem is None:
             errors.append(-1)
         else:
+            self._dne_checkbutton.configure(bg='orange')
+
             index = 0
             for i in range(self._answer_current_problem.nRows):
                 for j in range(self._answer_current_problem.nCols):
@@ -369,6 +379,7 @@ class MainWindow:
 
         return "break"
 
+
 class Matrix:
 
     def __init__(self, d1, d2, nums):
@@ -398,6 +409,26 @@ class Matrix:
                 index += 1
 
         return Matrix(self.nRows, matrix2.nCols, numResult)
+
+
+class Bracket(tk.Canvas):
+
+    def __init__(self, parent, type='open', length_y=1, *args, **kwargs):
+        tk.Canvas.__init__(self, parent, *args, **kwargs)
+
+        length_y = [50, 120, 65 * 3, 65 * 4][length_y - 1]
+        x_shift = -1
+
+        if type == 'open':
+            x_shift = 0
+        elif type == 'closed':
+            x_shift = 5
+        else:
+            raise Exception('Invalid type: \'' + type + '\'')
+
+        self.create_rectangle(10+x_shift, 10, 15+x_shift, 10+length_y, fill='black') # vertical rectangle
+        self.create_rectangle(10, 10, 20, 15, fill='black') # top horizontal rectangle
+        self.create_rectangle(10, 5+length_y, 20, 10+length_y, fill='black') # bottom horizontal rectangle
 
 
 if __name__ == '__main__':
